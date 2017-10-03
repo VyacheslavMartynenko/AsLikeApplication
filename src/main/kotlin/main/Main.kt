@@ -14,6 +14,10 @@ class Main {
             val main = Main()
             main.getApplicationList()
             main.saveApplicationInfo()
+//            val str = "stf"
+//            val eqw = "12"
+//            str.toIntOrNull()?.let { println(it) } ?: println(str)
+//            eqw.toIntOrNull()?.let { println(it) } ?: println(eqw)
         }
     }
 
