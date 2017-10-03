@@ -11,7 +11,7 @@ class Main {
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            Main().start()
+            Main().getApplicationInfo()
         }
     }
 
@@ -20,12 +20,12 @@ class Main {
     private val gson = Gson()
     private val path = Paths.get("output.txt")
 
-    private fun start() {
-        executorService.execute(getApplicationInfo(1226926872))
+    private fun getApplicationInfo() {
+        executorService.execute(writeApplicationInfo(1226926872))
         executorService.shutdown()
     }
 
-    private fun getApplicationInfo(id: Int): Runnable {
+    private fun writeApplicationInfo(id: Int): Runnable {
         return Runnable {
             apiCall.getApplicationInfo(id).subscribe {
                 val appInfo = gson.toJson(it.results.first())
