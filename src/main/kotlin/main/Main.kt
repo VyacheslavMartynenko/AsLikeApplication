@@ -1,14 +1,27 @@
 package main
 
+import com.google.gson.Gson
 import networking.ApiCall
+import java.io.FileWriter
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
 import java.util.concurrent.Executors
 
-object Main {
+class Main {
+    companion object {
+        @JvmStatic
+        fun main(args: Array<String>) {
+            Main().start()
+        }
+    }
+
     private val executorService = Executors.newFixedThreadPool(1)
     private val apiCall = ApiCall.Factory.create()
+    private val gson = Gson()
+    private val path = Paths.get("output.txt")
 
-    @JvmStatic
-    fun main(args: Array<String>) {
+    private fun start() {
         executorService.execute(getApplicationInfo(1226926872))
         executorService.shutdown()
     }
@@ -16,9 +29,8 @@ object Main {
     private fun getApplicationInfo(id: Int): Runnable {
         return Runnable {
             apiCall.getApplicationInfo(id).subscribe {
-                it.results.forEach {
-                    print(it.description + " " + it.userRating)
-                }
+                val appInfo = gson.toJson(it.results.first())
+                Files.write(path, appInfo.toString().toByteArray(), StandardOpenOption.APPEND);
             }
         }
     }
