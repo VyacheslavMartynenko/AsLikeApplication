@@ -2,7 +2,6 @@ package main
 
 import com.google.gson.Gson
 import networking.ApiCall
-import java.io.FileWriter
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
