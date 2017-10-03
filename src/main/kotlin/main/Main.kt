@@ -21,25 +21,40 @@ class Main {
     private val apiCall = ApiCall.Factory.create()
     private val gson = Gson()
     private val inPathId = Paths.get("InputId.txt")
+    private val inPathBundleId = Paths.get("InputBundleId.txt")
     private val outPath = Paths.get("Output.txt")
     private lateinit var applicationListId: List<String>
+    private lateinit var applicationListBundleId: List<String>
 
     private fun getApplicationList() {
         applicationListId = Files.readAllLines(inPathId)
+        applicationListBundleId = Files.readAllLines(inPathBundleId)
         println(applicationListId.first())
+        println(applicationListBundleId.first())
     }
 
     private fun saveApplicationInfo() {
-        executorService.execute(writeApplicationInfo(applicationListId.first().toInt()))
+        executorService.execute(writeApplicationInfoId(applicationListId.first().toInt()))
+        executorService.execute(writeApplicationInfoBundleId(applicationListBundleId.first()))
         executorService.shutdown()
     }
 
-    private fun writeApplicationInfo(id: Int): Runnable {
+    private fun writeApplicationInfoId(id: Int): Runnable {
         return Runnable {
             apiCall.getApplicationInfoById(id).subscribe {
                 val appInfo = gson.toJson(it.results.first())
                 println(appInfo)
-                Files.write(outPath, appInfo.toString().toByteArray(), StandardOpenOption.APPEND);
+                Files.write(outPath, appInfo.toString().toByteArray(), StandardOpenOption.APPEND)
+            }
+        }
+    }
+
+    private fun writeApplicationInfoBundleId(bundleId: String): Runnable {
+        return Runnable {
+            apiCall.getApplicationInfoByBundleId(bundleId).subscribe {
+                val appInfo = gson.toJson(it.results.first())
+                println(appInfo)
+                Files.write(outPath, appInfo.toString().toByteArray(), StandardOpenOption.APPEND)
             }
         }
     }
