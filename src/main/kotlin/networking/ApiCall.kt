@@ -16,6 +16,9 @@ interface ApiCall {
     @GET("lookup")
     fun getApplicationInfoById(@Query("id") id: Int): Observable<ApplicationInfoResponse>
 
+    @GET("lookup")
+    fun getApplicationInfoByBundleId(@Query("bundleId") bundleId: String): Observable<ApplicationInfoResponse>
+
     object Factory {
         private val BASE_URL = "https://itunes.apple.com/"
         private val NETWORK_CALL_TIMEOUT = 60

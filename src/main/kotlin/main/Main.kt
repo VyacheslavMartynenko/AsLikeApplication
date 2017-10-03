@@ -20,17 +20,17 @@ class Main {
     private val executorService = Executors.newFixedThreadPool(1)
     private val apiCall = ApiCall.Factory.create()
     private val gson = Gson()
-    private val inPath = Paths.get("Input.txt")
+    private val inPathId = Paths.get("InputId.txt")
     private val outPath = Paths.get("Output.txt")
-    private lateinit var applicationList: List<String>
+    private lateinit var applicationListId: List<String>
 
     private fun getApplicationList() {
-        applicationList = Files.readAllLines(inPath)
-        println(applicationList.first())
+        applicationListId = Files.readAllLines(inPathId)
+        println(applicationListId.first())
     }
 
     private fun saveApplicationInfo() {
-        executorService.execute(writeApplicationInfo(applicationList.first().toInt()))
+        executorService.execute(writeApplicationInfo(applicationListId.first().toInt()))
         executorService.shutdown()
     }
 
