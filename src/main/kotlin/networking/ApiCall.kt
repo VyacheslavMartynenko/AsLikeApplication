@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 interface ApiCall {
 
     @GET("lookup")
-    fun getApplicationInfo(@Query("id") id: Int): Observable<ApplicationInfoResponse>
+    fun getApplicationInfoById(@Query("id") id: Int): Observable<ApplicationInfoResponse>
 
     object Factory {
         private val BASE_URL = "https://itunes.apple.com/"

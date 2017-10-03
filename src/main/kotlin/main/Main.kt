@@ -36,7 +36,7 @@ class Main {
 
     private fun writeApplicationInfo(id: Int): Runnable {
         return Runnable {
-            apiCall.getApplicationInfo(id).subscribe {
+            apiCall.getApplicationInfoById(id).subscribe {
                 val appInfo = gson.toJson(it.results.first())
                 println(appInfo)
                 Files.write(outPath, appInfo.toString().toByteArray(), StandardOpenOption.APPEND);
