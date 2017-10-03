@@ -11,17 +11,26 @@ class Main {
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            Main().getApplicationInfo()
+            val main = Main()
+            main.getApplicationList()
+            main.saveApplicationInfo()
         }
     }
 
     private val executorService = Executors.newFixedThreadPool(1)
     private val apiCall = ApiCall.Factory.create()
     private val gson = Gson()
-    private val path = Paths.get("output.txt")
+    private val inPath = Paths.get("Input.txt")
+    private val outPath = Paths.get("Output.txt")
+    private lateinit var applicationList: List<String>
 
-    private fun getApplicationInfo() {
-        executorService.execute(writeApplicationInfo(1226926872))
+    private fun getApplicationList() {
+        applicationList = Files.readAllLines(inPath)
+        println(applicationList.first())
+    }
+
+    private fun saveApplicationInfo() {
+        executorService.execute(writeApplicationInfo(applicationList.first().toInt()))
         executorService.shutdown()
     }
 
@@ -29,7 +38,8 @@ class Main {
         return Runnable {
             apiCall.getApplicationInfo(id).subscribe {
                 val appInfo = gson.toJson(it.results.first())
-                Files.write(path, appInfo.toString().toByteArray(), StandardOpenOption.APPEND);
+                println(appInfo)
+                Files.write(outPath, appInfo.toString().toByteArray(), StandardOpenOption.APPEND);
             }
         }
     }
