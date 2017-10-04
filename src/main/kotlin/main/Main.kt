@@ -2,6 +2,7 @@ package main
 
 import com.google.gson.Gson
 import networking.ApiCall
+import networking.model.ApplicationInfoResponse
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
@@ -14,52 +15,41 @@ class Main {
             val main = Main()
             main.getApplicationList()
             main.saveApplicationInfo()
-//            val str = "stf"
-//            val eqw = "12"
-//            str.toIntOrNull()?.let { println(it) } ?: println(str)
-//            eqw.toIntOrNull()?.let { println(it) } ?: println(eqw)
         }
     }
 
     private val executorService = Executors.newFixedThreadPool(1)
     private val apiCall = ApiCall.Factory.create()
     private val gson = Gson()
-    private val inPathId = Paths.get("InputId.txt")
-    private val inPathBundleId = Paths.get("InputBundleId.txt")
+
+    private val inPath = Paths.get("InputAll.txt")
     private val outPath = Paths.get("Output.txt")
-    private lateinit var applicationListId: List<String>
-    private lateinit var applicationListBundleId: List<String>
+
+    private lateinit var applicationList: List<String>
 
     private fun getApplicationList() {
-        applicationListId = Files.readAllLines(inPathId)
-        applicationListBundleId = Files.readAllLines(inPathBundleId)
-        println(applicationListId.first())
-        println(applicationListBundleId.first())
+        applicationList = Files.readAllLines(inPath)
+        println(applicationList.first())
     }
 
     private fun saveApplicationInfo() {
-        executorService.execute(writeApplicationInfoId(applicationListId.first().toInt()))
-        executorService.execute(writeApplicationInfoBundleId(applicationListBundleId.first()))
+        executorService.execute(writeApplicationInfo(applicationList.first()))
         executorService.shutdown()
     }
 
-    private fun writeApplicationInfoId(id: Int): Runnable {
+    private fun writeApplicationInfo(id: String): Runnable {
         return Runnable {
-            apiCall.getApplicationInfoById(id).subscribe {
-                val appInfo = gson.toJson(it.results.first())
-                println(appInfo)
-                Files.write(outPath, appInfo.toString().toByteArray(), StandardOpenOption.APPEND)
-            }
+            id.toIntOrNull()?.let {
+                apiCall.getApplicationInfoById(it).subscribe { write(it) }
+            } ?: apiCall.getApplicationInfoByBundleId(id).subscribe { write(it) }
         }
     }
 
-    private fun writeApplicationInfoBundleId(bundleId: String): Runnable {
-        return Runnable {
-            apiCall.getApplicationInfoByBundleId(bundleId).subscribe {
-                val appInfo = gson.toJson(it.results.first())
-                println(appInfo)
-                Files.write(outPath, appInfo.toString().toByteArray(), StandardOpenOption.APPEND)
-            }
+    private fun write(applicationInfoResponse: ApplicationInfoResponse) {
+        applicationInfoResponse.results.first().let {
+            val appInfo = gson.toJson(it)
+            println(appInfo)
+            Files.write(outPath, appInfo.toString().toByteArray(), StandardOpenOption.APPEND)
         }
     }
 }
