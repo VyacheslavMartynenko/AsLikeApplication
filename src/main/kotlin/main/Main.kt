@@ -22,7 +22,7 @@ class Main {
     private val apiCall = ApiCall.Factory.create()
     private val gson = Gson()
 
-    private val inPath = Paths.get("InputAll.txt")
+    private val inPath = Paths.get("InputBundleId.txt")
     private val outPath = Paths.get("Output.txt")
 
     private lateinit var applicationList: List<String>
@@ -48,7 +48,7 @@ class Main {
     }
 
     private fun write(applicationInfoResponse: ApplicationInfoResponse) {
-        applicationInfoResponse.results.first().let {
+        applicationInfoResponse.results.firstOrNull()?.let {
             val appInfo = gson.toJson(it)
             println(appInfo)
             Files.write(outPath, appInfo.toString().toByteArray(), StandardOpenOption.APPEND)
