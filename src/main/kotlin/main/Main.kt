@@ -29,11 +29,13 @@ class Main {
 
     private fun getApplicationList() {
         applicationList = Files.readAllLines(inPath)
-        println(applicationList.first())
     }
 
     private fun saveApplicationInfo() {
-        executorService.execute(writeApplicationInfo(applicationList.first()))
+        for (i in 1..10) {
+            println(applicationList[i])
+            executorService.execute(writeApplicationInfo(applicationList[i]))
+        }
         executorService.shutdown()
     }
 
