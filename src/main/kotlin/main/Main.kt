@@ -7,6 +7,8 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.util.concurrent.Executors
+import com.detectlanguage.DetectLanguage
+
 
 class Main {
     companion object {
@@ -28,12 +30,12 @@ class Main {
     private lateinit var applicationList: List<String>
 
     private fun getApplicationList() {
+        DetectLanguage.apiKey = "dd91b09c32474791552a1b27e0ba0085"
         applicationList = Files.readAllLines(inPath)
     }
 
     private fun saveApplicationInfo() {
-        for (i in 1..10) {
-            println(applicationList[i])
+        for (i in 3000..3100) {
             executorService.execute(writeApplicationInfo(applicationList[i]))
         }
         executorService.shutdown()
@@ -49,9 +51,10 @@ class Main {
 
     private fun write(applicationInfoResponse: ApplicationInfoResponse) {
         applicationInfoResponse.results.firstOrNull()?.let {
-            val appInfo = gson.toJson(it)
-            println(appInfo)
-            Files.write(outPath, appInfo.toString().toByteArray(), StandardOpenOption.APPEND)
+            val appInfo = gson.toJson(it).replace("\\n", "")
+            DetectLanguage.detect(it.description)
+                    .filter { it.language == "en" && it.isReliable }
+                    .forEach { Files.write(outPath, appInfo.toByteArray(), StandardOpenOption.APPEND) }
         }
     }
 }
