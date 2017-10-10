@@ -35,9 +35,7 @@ class Main {
     }
 
     private fun saveApplicationInfo() {
-        for (i in 3000..3100) {
-            executorService.execute(writeApplicationInfo(applicationList[i]))
-        }
+        applicationList.forEach { executorService.execute(writeApplicationInfo(it)) }
         executorService.shutdown()
     }
 
