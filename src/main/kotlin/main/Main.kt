@@ -58,7 +58,7 @@ class Main {
 
     private fun write(applicationInfoResponse: ApplicationInfoResponse) {
         applicationInfoResponse.results.firstOrNull()?.let {
-            val appInfo = gson.toJson(it).replace("\\n", "")
+            val appInfo = gson.toJson(it).replace("\\n", " ")
             val textObject = textObjectFactory.forText(appInfo)
             val lang = languageDetector.detect(textObject).takeIf { it.isPresent }?.get()?.language
             if (lang == "en") {
