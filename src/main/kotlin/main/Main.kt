@@ -1,13 +1,16 @@
 package main
 
 import com.google.gson.Gson
+import com.optimaize.langdetect.LanguageDetectorBuilder
+import com.optimaize.langdetect.ngram.NgramExtractors
+import com.optimaize.langdetect.profiles.LanguageProfileReader
+import com.optimaize.langdetect.text.CommonTextObjectFactories
 import networking.ApiCall
 import networking.model.ApplicationInfoResponse
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.util.concurrent.Executors
-import com.detectlanguage.DetectLanguage
 
 
 class Main {
@@ -29,8 +32,14 @@ class Main {
 
     private lateinit var applicationList: List<String>
 
+    private val languageProfiles = LanguageProfileReader().readAllBuiltIn()
+    private var languageDetector = LanguageDetectorBuilder.create(NgramExtractors.standard())
+            .withProfiles(languageProfiles)
+            .build()
+    private var textObjectFactory = CommonTextObjectFactories.forDetectingOnLargeText()
+
+
     private fun getApplicationList() {
-        DetectLanguage.apiKey = "dd91b09c32474791552a1b27e0ba0085"
         applicationList = Files.readAllLines(inPath)
     }
 
@@ -50,9 +59,11 @@ class Main {
     private fun write(applicationInfoResponse: ApplicationInfoResponse) {
         applicationInfoResponse.results.firstOrNull()?.let {
             val appInfo = gson.toJson(it).replace("\\n", "")
-            DetectLanguage.detect(it.description)
-                    .filter { it.language == "en" && it.isReliable }
-                    .forEach { Files.write(outPath, appInfo.toByteArray(), StandardOpenOption.APPEND) }
+            val textObject = textObjectFactory.forText(appInfo)
+            val lang = languageDetector.detect(textObject).takeIf { it.isPresent }?.get()?.language
+            if (lang == "en") {
+                Files.write(outPath, appInfo.toByteArray(), StandardOpenOption.APPEND)
+            }
         }
     }
 }
