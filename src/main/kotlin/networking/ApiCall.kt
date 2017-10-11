@@ -1,5 +1,6 @@
 package networking
 
+import io.reactivex.Flowable
 import io.reactivex.Observable
 import networking.model.ApplicationInfoResponse
 import okhttp3.OkHttpClient
@@ -14,10 +15,10 @@ import java.util.concurrent.TimeUnit
 interface ApiCall {
 
     @GET("lookup")
-    fun getApplicationInfoById(@Query("id") id: Int): Observable<ApplicationInfoResponse>
+    fun getApplicationInfoById(@Query("id") id: Int): Flowable<ApplicationInfoResponse>
 
     @GET("lookup")
-    fun getApplicationInfoByBundleId(@Query("bundleId") bundleId: String): Observable<ApplicationInfoResponse>
+    fun getApplicationInfoByBundleId(@Query("bundleId") bundleId: String): Flowable<ApplicationInfoResponse>
 
     object Factory {
         private val BASE_URL = "https://itunes.apple.com/"
