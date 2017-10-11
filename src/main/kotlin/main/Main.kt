@@ -23,7 +23,7 @@ class Main {
         }
     }
 
-    private val executorService = Executors.newFixedThreadPool(1)
+    private val executorService = Executors.newSingleThreadExecutor()
     private val apiCall = ApiCall.Factory.create()
     private val gson = Gson()
 
@@ -51,8 +51,8 @@ class Main {
     private fun writeApplicationInfo(id: String): Runnable {
         return Runnable {
             id.toIntOrNull()?.let {
-                apiCall.getApplicationInfoById(it).subscribe { write(it) }
-            } ?: apiCall.getApplicationInfoByBundleId(id).subscribe { write(it) }
+                apiCall.getApplicationInfoById(it).subscribe({ write(it) }, { print(it) })
+            } ?: apiCall.getApplicationInfoByBundleId(id).subscribe({ write(it) }, { print(it) })
         }
     }
 
