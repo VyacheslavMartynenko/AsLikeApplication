@@ -1,7 +1,6 @@
 package networking
 
 import io.reactivex.Flowable
-import io.reactivex.Observable
 import networking.model.ApplicationInfoResponse
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
