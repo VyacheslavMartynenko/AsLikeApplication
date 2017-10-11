@@ -51,8 +51,8 @@ class Main {
     private fun writeApplicationInfo(id: String): Runnable {
         return Runnable {
             id.toIntOrNull()?.let {
-                apiCall.getApplicationInfoById(it).subscribe({ write(it) }, { print(it) })
-            } ?: apiCall.getApplicationInfoByBundleId(id).subscribe({ write(it) }, { print(it) })
+                apiCall.getApplicationInfoById(it).subscribe({ write(it) }, { println(it) })
+            } ?: apiCall.getApplicationInfoByBundleId(id).subscribe({ write(it) }, { println(it) })
         }
     }
 
