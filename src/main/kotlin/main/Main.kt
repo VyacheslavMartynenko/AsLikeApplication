@@ -85,5 +85,22 @@ class Main {
             applications.add(it.trackName)
             it.description.split(" ").forEach { words.add(it) }
         }
+        fillMatrix(words)
+    }
+
+    private fun fillMatrix(words: Set<String>) {
+        val map: HashMap<String, List<Int>> = hashMapOf()
+        applicationInfoList.forEach {
+            val list = arrayListOf<Int>()
+            val descriptionWords = it.description.split(" ")
+            words.forEach {
+                val word = it
+                val count = descriptionWords.count { it == word }
+                list.add(count)
+            }
+            map.put(it.trackName, list)
+        }
+        print(words)
+        map.forEach { println(it.toString()) }
     }
 }
