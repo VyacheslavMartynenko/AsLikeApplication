@@ -22,6 +22,7 @@ class Main {
             //main.getApplicationList()
             //main.saveApplicationInfo()
             main.readApplicationInfo()
+            main.createMatrix()
         }
     }
 
@@ -33,6 +34,7 @@ class Main {
     private val outPath = Paths.get("Output.txt")
 
     private lateinit var applicationList: List<String>
+    private lateinit var applicationInfoList: List<ApplicationInfoResponse.Result>
 
     private val languageProfiles = LanguageProfileReader().readAllBuiltIn()
     private var languageDetector = LanguageDetectorBuilder.create(NgramExtractors.standard())
@@ -73,7 +75,15 @@ class Main {
 
     private fun readApplicationInfo() {
         val description = Files.readAllLines(outPath).joinToString()
-        val applicationInfoList: List<ApplicationInfoResponse> = gson.fromJson(description, object : TypeToken<List<ApplicationInfoResponse>>() {}.type)
-        print("List size: %d.".format(applicationInfoList.size))
+        applicationInfoList = gson.fromJson(description, object : TypeToken<List<ApplicationInfoResponse.Result>>() {}.type)
+    }
+
+    private fun createMatrix() {
+        val applications = mutableSetOf<String>()
+        val words = mutableSetOf<String>()
+        applicationInfoList.forEach {
+            applications.add(it.trackName)
+            it.description.split(" ").forEach { words.add(it) }
+        }
     }
 }
