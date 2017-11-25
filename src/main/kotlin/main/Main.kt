@@ -1,6 +1,7 @@
 package main
 
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.optimaize.langdetect.LanguageDetectorBuilder
 import com.optimaize.langdetect.ngram.NgramExtractors
 import com.optimaize.langdetect.profiles.LanguageProfileReader
@@ -18,8 +19,9 @@ class Main {
         @JvmStatic
         fun main(args: Array<String>) {
             val main = Main()
-            main.getApplicationList()
-            main.saveApplicationInfo()
+            //main.getApplicationList()
+            //main.saveApplicationInfo()
+            main.readApplicationInfo()
         }
     }
 
@@ -64,8 +66,14 @@ class Main {
             val textObject = textObjectFactory.forText(appInfo)
             val lang = languageDetector.detect(textObject).takeIf { it.isPresent }?.get()?.language
             if (lang == "en") {
-                Files.write(outPath, appInfo.toByteArray(), StandardOpenOption.APPEND)
+                Files.write(outPath, appInfo.plus(", ").toByteArray(), StandardOpenOption.APPEND)
             }
         }
+    }
+
+    private fun readApplicationInfo() {
+        val description = Files.readAllLines(outPath).joinToString()
+        val applicationInfoList: List<ApplicationInfoResponse> = gson.fromJson(description, object : TypeToken<List<ApplicationInfoResponse>>() {}.type)
+        print("List size: %d.".format(applicationInfoList.size))
     }
 }
