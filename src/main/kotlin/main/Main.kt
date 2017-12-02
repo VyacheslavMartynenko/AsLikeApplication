@@ -9,6 +9,8 @@ import com.optimaize.langdetect.text.CommonTextObjectFactories
 import networking.ApiCall
 import networking.model.ApplicationInfoResponse
 import org.apache.commons.math3.linear.MatrixUtils
+import org.apache.commons.math3.linear.RealMatrix
+import org.apache.commons.math3.linear.SingularValueDecomposition
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
@@ -90,21 +92,28 @@ class Main {
     }
 
     private fun fillMatrix(words: Set<String>) {
-        val map: HashMap<String, DoubleArray> = hashMapOf()
+        val textMap: HashMap<String, DoubleArray> = hashMapOf()
         applicationInfoList.forEach {
-            val list = arrayListOf<Double>()
+            val wordArray = DoubleArray(words.size)
             val descriptionWords = it.description.split(" ")
-            words.forEach {
-                val word = it
-                val count = descriptionWords.count { it == word }
-                list.add(count.toDouble())
+            words.forEachIndexed { index, s ->
+                val count = descriptionWords.count { it == s }
+                wordArray[index] = count.toDouble()
             }
-            map.put(it.trackName, list.toDoubleArray())
+            textMap.put(it.trackName, wordArray)
         }
         println(words)
-        map.values.forEach { println(it.toList()) }
-        val array = map.values.toTypedArray()
+        println()
+        val array = textMap.values.toTypedArray()
         val matrix = MatrixUtils.createRealMatrix(array)
         println(matrix.data.forEach { println(it.toList()) })
+        println()
+        factorizeMatrix(matrix)
+    }
+
+    private fun factorizeMatrix(matrix: RealMatrix) {
+        val svd = SingularValueDecomposition(matrix)
+        println(svd.s.data.forEach { println(it.toList()) })
+        println()
     }
 }
