@@ -1,5 +1,6 @@
 package main
 
+import Jama.Matrix
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.optimaize.langdetect.LanguageDetectorBuilder
@@ -89,18 +90,21 @@ class Main {
     }
 
     private fun fillMatrix(words: Set<String>) {
-        val map: HashMap<String, List<Int>> = hashMapOf()
+        val map: HashMap<String, DoubleArray> = hashMapOf()
         applicationInfoList.forEach {
-            val list = arrayListOf<Int>()
+            val list = arrayListOf<Double>()
             val descriptionWords = it.description.split(" ")
             words.forEach {
                 val word = it
                 val count = descriptionWords.count { it == word }
-                list.add(count)
+                list.add(count.toDouble())
             }
-            map.put(it.trackName, list)
+            map.put(it.trackName, list.toDoubleArray())
         }
         println(words)
-        map.forEach { println(it.toString()) }
+        map.values.forEach { println(it.toList()) }
+        val array = map.values.toTypedArray()
+        val matrix = Matrix(array, words.size, applicationInfoList.size)
+        println(matrix.array.forEach { println(it.toList()) })
     }
 }
