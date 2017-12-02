@@ -100,7 +100,7 @@ class Main {
             }
             map.put(it.trackName, list)
         }
-        print(words)
+        println(words)
         map.forEach { println(it.toString()) }
     }
 }
