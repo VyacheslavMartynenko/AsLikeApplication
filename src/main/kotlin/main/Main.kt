@@ -1,6 +1,5 @@
 package main
 
-import Jama.Matrix
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.optimaize.langdetect.LanguageDetectorBuilder
@@ -9,6 +8,7 @@ import com.optimaize.langdetect.profiles.LanguageProfileReader
 import com.optimaize.langdetect.text.CommonTextObjectFactories
 import networking.ApiCall
 import networking.model.ApplicationInfoResponse
+import org.apache.commons.math3.linear.MatrixUtils
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
@@ -104,7 +104,7 @@ class Main {
         println(words)
         map.values.forEach { println(it.toList()) }
         val array = map.values.toTypedArray()
-        val matrix = Matrix(array, words.size, applicationInfoList.size)
-        println(matrix.array.forEach { println(it.toList()) })
+        val matrix = MatrixUtils.createRealMatrix(array)
+        println(matrix.data.forEach { println(it.toList()) })
     }
 }
