@@ -2,15 +2,13 @@ package main
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.optimaize.langdetect.LanguageDetectorBuilder
-import com.optimaize.langdetect.ngram.NgramExtractors
-import com.optimaize.langdetect.profiles.LanguageProfileReader
-import com.optimaize.langdetect.text.CommonTextObjectFactories
+
 import networking.ApiCall
 import networking.model.ApplicationInfoResponse
 import org.apache.commons.math3.linear.MatrixUtils
 import org.apache.commons.math3.linear.RealMatrix
 import org.apache.commons.math3.linear.SingularValueDecomposition
+import org.apache.tika.language.LanguageIdentifier
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
@@ -22,10 +20,10 @@ class Main {
         @JvmStatic
         fun main(args: Array<String>) {
             val main = Main()
-            //main.getApplicationList()
-            //main.saveApplicationInfo()
-            main.readApplicationInfo()
-            main.createMatrix()
+            main.getApplicationList()
+            main.saveApplicationInfo()
+            //main.readApplicationInfo()
+            //main.createMatrix()
         }
     }
 
@@ -38,13 +36,6 @@ class Main {
 
     private lateinit var applicationList: List<String>
     private lateinit var applicationInfoList: List<ApplicationInfoResponse.Result>
-
-    private val languageProfiles = LanguageProfileReader().readAllBuiltIn()
-    private var languageDetector = LanguageDetectorBuilder.create(NgramExtractors.standard())
-            .withProfiles(languageProfiles)
-            .build()
-    private var textObjectFactory = CommonTextObjectFactories.forDetectingOnLargeText()
-
 
     private fun getApplicationList() {
         applicationList = Files.readAllLines(inPath)
@@ -68,8 +59,8 @@ class Main {
             val description = it.description.replace("\'", "").replace("[^A-Za-z ]".toRegex(), " ").trim().toLowerCase()
             it.description = description
             val appInfo = gson.toJson(it).replace("\\n", " ").replace(" {2,}".toRegex(), " ")
-            val textObject = textObjectFactory.forText(appInfo)
-            val lang = languageDetector.detect(textObject).takeIf { it.isPresent }?.get()?.language
+            val languageIdentifier = LanguageIdentifier(appInfo)
+            val lang = languageIdentifier.language
             if (lang == "en") {
                 Files.write(outPath, appInfo.plus(", ").toByteArray(), StandardOpenOption.APPEND)
             }
