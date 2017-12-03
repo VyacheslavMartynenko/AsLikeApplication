@@ -109,11 +109,22 @@ class Main {
         println(matrix.data.forEach { println(it.toList()) })
         println()
         factorizeMatrix(matrix)
+        computeCosineSimilarity(textMap[applicationInfoList[2].trackName] as DoubleArray
+                , textMap[applicationInfoList[3].trackName] as DoubleArray)
     }
 
     private fun factorizeMatrix(matrix: RealMatrix) {
         val svd = SingularValueDecomposition(matrix)
         println(svd.s.data.forEach { println(it.toList()) })
+        println()
+    }
+
+    private fun computeCosineSimilarity(leftVector: DoubleArray, rightVector: DoubleArray) {
+        val dotProduct = leftVector.indices.sumByDouble { (leftVector[it] * rightVector[it]).toLong().toDouble() }
+        val d1 = leftVector.sumByDouble { Math.pow(it, 2.0) }
+        val d2 = rightVector.sumByDouble { Math.pow(it, 2.0) }
+        val cosineSimilarity = if (d1 <= 0.0 || d2 <= 0.0) 0.0 else (dotProduct / (Math.sqrt(d1) * Math.sqrt(d2)))
+        println(cosineSimilarity)
         println()
     }
 }
