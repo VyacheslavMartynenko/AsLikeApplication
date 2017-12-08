@@ -20,10 +20,12 @@ class Main {
         @JvmStatic
         fun main(args: Array<String>) {
             val main = Main()
-            main.getApplicationList()
-            main.saveApplicationInfo()
-            //main.readApplicationInfo()
-            //main.createMatrix()
+            //main.getApplicationList()
+            //main.saveApplicationInfo()
+            main.readApplicationInfo()
+            main.createMatrix()
+            main.factorizeMatrix()
+            main.computeCosineSimilarity()
         }
     }
 
@@ -36,6 +38,8 @@ class Main {
 
     private lateinit var applicationList: List<String>
     private lateinit var applicationInfoList: List<ApplicationInfoResponse.Result>
+    private lateinit var textMap: HashMap<String, DoubleArray>
+    private lateinit var matrix: RealMatrix
 
     private fun getApplicationList() {
         applicationList = Files.readAllLines(inPath)
@@ -83,7 +87,7 @@ class Main {
     }
 
     private fun fillMatrix(words: Set<String>) {
-        val textMap: HashMap<String, DoubleArray> = hashMapOf()
+        textMap = hashMapOf()
         applicationInfoList.forEach {
             val wordArray = DoubleArray(words.size)
             val descriptionWords = it.description.split(" ")
@@ -96,21 +100,20 @@ class Main {
         println(words)
         println()
         val array = textMap.values.toTypedArray()
-        val matrix = MatrixUtils.createRealMatrix(array)
+        matrix = MatrixUtils.createRealMatrix(array)
         println(matrix.data.forEach { println(it.toList()) })
         println()
-        factorizeMatrix(matrix)
-        computeCosineSimilarity(textMap[applicationInfoList[2].trackName] as DoubleArray
-                , textMap[applicationInfoList[3].trackName] as DoubleArray)
     }
 
-    private fun factorizeMatrix(matrix: RealMatrix) {
+    private fun factorizeMatrix() {
         val svd = SingularValueDecomposition(matrix)
         println(svd.s.data.forEach { println(it.toList()) })
         println()
     }
 
-    private fun computeCosineSimilarity(leftVector: DoubleArray, rightVector: DoubleArray) {
+    private fun computeCosineSimilarity() {
+        val leftVector = textMap[applicationInfoList[2].trackName] as DoubleArray
+        val rightVector = textMap[applicationInfoList[3].trackName] as DoubleArray
         val dotProduct = leftVector.indices.sumByDouble { (leftVector[it] * rightVector[it]).toLong().toDouble() }
         val d1 = leftVector.sumByDouble { Math.pow(it, 2.0) }
         val d2 = rightVector.sumByDouble { Math.pow(it, 2.0) }
