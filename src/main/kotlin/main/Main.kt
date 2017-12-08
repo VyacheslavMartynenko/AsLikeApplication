@@ -12,6 +12,7 @@ import org.apache.tika.language.LanguageIdentifier
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
+import java.util.*
 import java.util.concurrent.Executors
 
 
@@ -25,7 +26,7 @@ class Main {
             main.readApplicationInfo()
             main.createMatrix()
             main.factorizeMatrix()
-            main.computeCosineSimilarity()
+            main.computeCosineMap()
         }
     }
 
@@ -111,14 +112,19 @@ class Main {
         println()
     }
 
-    private fun computeCosineSimilarity() {
-        val leftVector = textMap[applicationInfoList[2].trackName] as DoubleArray
-        val rightVector = textMap[applicationInfoList[3].trackName] as DoubleArray
+    private fun computeCosineMap() {
+        val test = textMap[applicationInfoList[0].trackName] as DoubleArray
+        val cosineMap: HashMap<String, Double> = hashMapOf()
+        textMap.forEach { t, u -> cosineMap.put(t, computeCosineSimilarity(test, u)) }
+        val sortedMap = cosineMap.toSortedMap(Comparator { o1, o2 -> if (cosineMap[o1]!! >= cosineMap[o2]!!) -1 else 1 })
+        println(sortedMap.values.toList().subList(0, 2))
+        println()
+    }
+
+    private fun computeCosineSimilarity(leftVector: DoubleArray, rightVector: DoubleArray): Double {
         val dotProduct = leftVector.indices.sumByDouble { (leftVector[it] * rightVector[it]).toLong().toDouble() }
         val d1 = leftVector.sumByDouble { Math.pow(it, 2.0) }
         val d2 = rightVector.sumByDouble { Math.pow(it, 2.0) }
-        val cosineSimilarity = if (d1 <= 0.0 || d2 <= 0.0) 0.0 else (dotProduct / (Math.sqrt(d1) * Math.sqrt(d2)))
-        println(cosineSimilarity)
-        println()
+        return if (d1 <= 0.0 || d2 <= 0.0) 0.0 else (dotProduct / (Math.sqrt(d1) * Math.sqrt(d2)))
     }
 }
