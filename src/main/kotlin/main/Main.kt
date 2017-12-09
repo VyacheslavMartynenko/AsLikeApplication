@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 import networking.ApiCall
+import networking.model.ApplicationCosine
 import networking.model.ApplicationInfoResponse
 import org.apache.commons.math3.linear.MatrixUtils
 import org.apache.commons.math3.linear.RealMatrix
@@ -36,6 +37,7 @@ class Main {
 
     private val inPath = Paths.get("InputBundleId.txt")
     private val outPath = Paths.get("Output.txt")
+    private val outCosinePath = Paths.get("CosineOutput.txt")
 
     private lateinit var applicationList: List<String>
     private lateinit var applicationInfoList: List<ApplicationInfoResponse.Result>
@@ -117,6 +119,7 @@ class Main {
         val cosineMap: HashMap<String, Double> = hashMapOf()
         textMap.forEach { t, u -> cosineMap.put(t, computeCosineSimilarity(test, u)) }
         val sortedMap = cosineMap.toSortedMap(Comparator { o1, o2 -> if (cosineMap[o1]!! >= cosineMap[o2]!!) -1 else 1 })
+        cosineMap.forEach { t, u -> Files.write(outCosinePath, gson.toJson(ApplicationCosine(t, u)).plus(", ").toByteArray(), StandardOpenOption.APPEND) }
         println(sortedMap.values.toList().subList(0, 2))
         println()
     }
