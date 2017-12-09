@@ -38,6 +38,7 @@ class Main {
     private val inPath = Paths.get("InputBundleId.txt")
     private val outPath = Paths.get("Output.txt")
     private val outCosinePath = Paths.get("CosineOutput.txt")
+    private val outFactorizePath = Paths.get("FactorizeOutput.txt")
 
     private lateinit var applicationList: List<String>
     private lateinit var applicationInfoList: List<ApplicationInfoResponse.Result>
@@ -110,7 +111,8 @@ class Main {
 
     private fun factorizeMatrix() {
         val svd = SingularValueDecomposition(matrix)
-        println(svd.s.data.forEach { println(it.toList()) })
+        svd.u.data.forEach { Files.write(outFactorizePath, it.toList().toString().plus(", ").plus(System.lineSeparator()).toByteArray(), StandardOpenOption.APPEND)}
+        println(svd.u.data.forEach { println(it.toList()) })
         println()
     }
 
