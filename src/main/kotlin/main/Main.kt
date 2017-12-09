@@ -2,6 +2,7 @@ package main
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.opencsv.CSVWriter
 
 import networking.ApiCall
 import networking.model.ApplicationCosine
@@ -15,6 +16,10 @@ import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.util.*
 import java.util.concurrent.Executors
+import java.io.FileWriter
+import java.io.File
+
+
 
 
 class Main {
@@ -114,6 +119,18 @@ class Main {
         svd.u.data.forEach { Files.write(outFactorizePath, it.toList().toString().plus(", ").plus(System.lineSeparator()).toByteArray(), StandardOpenOption.APPEND)}
         println(svd.u.data.forEach { println(it.toList()) })
         println()
+        writeToCsv(svd.u.data)
+    }
+
+    private fun writeToCsv(data: Array<out DoubleArray>) {
+        val file = File("U.csv")
+        if (!file.isFile) {
+            file.createNewFile()
+        }
+        val csvWriter = CSVWriter(FileWriter(file))
+        data.forEach { csvWriter.writeNext(it.map { it.toString() }.toTypedArray()) }
+        csvWriter.flush()
+        csvWriter.close()
     }
 
     private fun computeCosineMap() {
