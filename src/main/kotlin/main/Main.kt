@@ -23,7 +23,7 @@ class Main {
     //TODO remove block words
     //TODO move files constants
     //TODO fix double precision
-    //TODO fill database
+    //TODO fill full database
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
