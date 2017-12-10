@@ -94,12 +94,11 @@ class Main {
     private fun createMatrix() {
         textMap = mutableMapOf()
         applicationInfoList.forEach {
-            val wordArray = DoubleArray(wordSet.size)
             val descriptionWords = it.description.split(" ")
-            wordSet.forEachIndexed { index, s ->
-                val count = descriptionWords.count { it == s }
-                wordArray[index] = count.toDouble()
-            }
+            val wordArray = wordSet.map {
+                val word = it
+                descriptionWords.count { it == word }.toDouble()
+            }.toDoubleArray()
             textMap.put(it.trackName, wordArray)
         }
         val array = textMap.values.toTypedArray()
