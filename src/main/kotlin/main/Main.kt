@@ -1,16 +1,16 @@
 package main
 
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.opencsv.CSVReader
 import com.opencsv.CSVWriter
 import networking.ApiCall
-import networking.model.ApplicationCosine
 import networking.model.ApplicationInfoResponse
 import org.apache.commons.math3.linear.MatrixUtils
 import org.apache.commons.math3.linear.RealMatrix
 import org.apache.commons.math3.linear.SingularValueDecomposition
 import org.apache.tika.language.LanguageIdentifier
 import java.io.File
+import java.io.FileReader
 import java.io.FileWriter
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -20,13 +20,17 @@ import java.util.concurrent.Executors
 
 
 class Main {
+    //TODO rename to csv
+    //TODO move files constants
+    //TODO fix double precision
+    //TODO fill database
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             val main = Main()
             //main.getApplicationList()
             //main.saveApplicationInfo()
-            main.readApplicationInfo()
+            main.readApplicationInfoFromCsw()
             main.createWordSet()
             main.createMatrix()
             main.factorizeMatrix()
@@ -42,7 +46,7 @@ class Main {
     private val outPath = Paths.get("Output.txt")
 
     private lateinit var applicationList: List<String>
-    private lateinit var applicationInfoList: List<ApplicationInfoResponse.Result>
+    private lateinit var applicationInfoList: MutableList<ApplicationInfoResponse.Result>
     private lateinit var wordSet: MutableSet<String>
     private lateinit var textMap: MutableMap<String, DoubleArray>
     private lateinit var matrix: RealMatrix
@@ -72,14 +76,28 @@ class Main {
             val languageIdentifier = LanguageIdentifier(appInfo)
             val lang = languageIdentifier.language
             if (lang == "en") {
+                writeApplicationInfoToCsw(it)
                 Files.write(outPath, appInfo.plus(", ").toByteArray(), StandardOpenOption.APPEND)
             }
         }
     }
 
-    private fun readApplicationInfo() {
-        val description = Files.readAllLines(outPath).joinToString()
-        applicationInfoList = gson.fromJson(description, object : TypeToken<List<ApplicationInfoResponse.Result>>() {}.type)
+    private fun writeApplicationInfoToCsw(app: ApplicationInfoResponse.Result) {
+        val cswWriter = getCswWriter("App.csv")
+        cswWriter.writeNext(arrayOf(app.trackName, app.description, app.trackId.toString(), app.bundleId, app.userRating.toString()))
+        cswWriter.flush()
+        cswWriter.close()
+        readApplicationInfoFromCsw()
+    }
+
+    private fun readApplicationInfoFromCsw() {
+        val cswReader = getCswReader("App.csv")
+        applicationInfoList = mutableListOf()
+        cswReader?.readAll()?.forEach {
+            val applicationInfo = ApplicationInfoResponse.Result(it[2].toInt(), it[0], it[3], it[1], it[4].toDouble())
+            applicationInfoList.add(applicationInfo)
+        }
+        cswReader?.close()
     }
 
     private fun createWordSet() {
@@ -148,5 +166,14 @@ class Main {
             file.createNewFile()
         }
         return CSVWriter(FileWriter(file))
+    }
+
+    private fun getCswReader(pathName: String): CSVReader? {
+        val file = File(pathName)
+        return if (file.isFile) {
+            CSVReader(FileReader(file))
+        } else {
+            null
+        }
     }
 }
