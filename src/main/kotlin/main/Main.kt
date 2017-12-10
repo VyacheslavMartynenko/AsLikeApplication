@@ -118,7 +118,7 @@ class Main {
 
     private fun writeFactorizeMatrixToCsv(data: Array<out DoubleArray>) {
         val csvWriter = getCswWriter("U.csv")
-        data.forEach { csvWriter.writeNext(it.map { it.toString() }.toTypedArray()) }
+        data.map { it.map { it.toString() }.toTypedArray() }.toTypedArray().forEach { csvWriter.writeNext(it) }
         csvWriter.flush()
         csvWriter.close()
     }
