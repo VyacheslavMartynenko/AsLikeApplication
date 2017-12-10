@@ -44,7 +44,7 @@ class Main {
     private lateinit var applicationList: List<String>
     private lateinit var applicationInfoList: List<ApplicationInfoResponse.Result>
     private lateinit var wordSet: MutableSet<String>
-    private lateinit var textMap: HashMap<String, DoubleArray>
+    private lateinit var textMap: MutableMap<String, DoubleArray>
     private lateinit var matrix: RealMatrix
 
     private fun getApplicationList() {
@@ -92,7 +92,7 @@ class Main {
     }
 
     private fun createMatrix() {
-        textMap = hashMapOf()
+        textMap = mutableMapOf()
         applicationInfoList.forEach {
             val wordArray = DoubleArray(wordSet.size)
             val descriptionWords = it.description.split(" ")
