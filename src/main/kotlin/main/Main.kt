@@ -113,7 +113,6 @@ class Main {
 
     private fun factorizeMatrix() {
         val svd = SingularValueDecomposition(matrix)
-        svd.u.data.forEach { Files.write(outFactorizePath, it.toList().toString().plus(", ").plus(System.lineSeparator()).toByteArray(), StandardOpenOption.APPEND) }
         writeToCsv(svd.u.data)
         println(svd.u.data.forEach { println(it.toList()) })
         println()
