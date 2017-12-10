@@ -25,14 +25,8 @@ class Main {
         @JvmStatic
         fun main(args: Array<String>) {
             val main = Main()
-            main.createStopWordSet()
-            main.getApplicationList()
-            main.saveApplicationInfo()
-//            main.readApplicationInfoFromCsv()
-//            main.createWordSet()
-//            main.createMatrix()
-//            main.factorizeMatrix()
-//            main.computeCosineMap()
+            //main.prepareDataSet()
+            main.processDataSet()
         }
     }
 
@@ -52,6 +46,20 @@ class Main {
     private lateinit var wordSet: MutableSet<String>
     private lateinit var textMap: MutableMap<String, DoubleArray>
     private lateinit var matrix: RealMatrix
+
+    private fun prepareDataSet() {
+        createStopWordSet()
+        getApplicationList()
+        saveApplicationInfo()
+    }
+
+    private fun processDataSet() {
+        readApplicationInfoFromCsv()
+        createWordSet()
+        createMatrix()
+        factorizeMatrix()
+        computeCosineMap()
+    }
 
     private fun createStopWordSet() {
         stopWordSet = Files.readAllLines(stopWordsPath).toMutableSet()
