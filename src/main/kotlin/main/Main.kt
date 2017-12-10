@@ -114,9 +114,9 @@ class Main {
     private fun factorizeMatrix() {
         val svd = SingularValueDecomposition(matrix)
         svd.u.data.forEach { Files.write(outFactorizePath, it.toList().toString().plus(", ").plus(System.lineSeparator()).toByteArray(), StandardOpenOption.APPEND) }
+        writeToCsv(svd.u.data)
         println(svd.u.data.forEach { println(it.toList()) })
         println()
-        writeToCsv(svd.u.data)
     }
 
     private fun writeToCsv(data: Array<out DoubleArray>) {
@@ -128,11 +128,10 @@ class Main {
 
     private fun computeCosineMap() {
         val test = textMap[applicationInfoList[0].trackName] as DoubleArray
-        val cosineMap: HashMap<String, Double> = hashMapOf()
-        textMap.forEach { t, u -> cosineMap.put(t, computeCosineSimilarity(test, u)) }
-        val sortedMap = cosineMap.toSortedMap(Comparator { o1, o2 -> if (cosineMap[o1]!! >= cosineMap[o2]!!) -1 else 1 })
-        cosineMap.forEach { t, u -> Files.write(outCosinePath, gson.toJson(ApplicationCosine(t, u)).plus(", ").toByteArray(), StandardOpenOption.APPEND) }
-        println(sortedMap.values.toList().subList(0, 2))
+        val cosineMap = textMap.mapValues { computeCosineSimilarity(test, it.value) }
+        val sortedCosineMap = cosineMap.toSortedMap(Comparator { o1, o2 -> if (cosineMap[o1]!! >= cosineMap[o2]!!) -1 else 1 })
+        sortedCosineMap.forEach { t, u -> Files.write(outCosinePath, gson.toJson(ApplicationCosine(t, u)).plus(", ").toByteArray(), StandardOpenOption.APPEND) }
+        println(sortedCosineMap.values.toList().subList(0, 2))
         println()
     }
 
