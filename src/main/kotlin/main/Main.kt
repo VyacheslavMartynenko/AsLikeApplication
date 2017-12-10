@@ -28,6 +28,7 @@ class Main {
             //main.saveApplicationInfo()
             main.readApplicationInfo()
             main.createMatrix()
+            main.fillMatrix()
             main.factorizeMatrix()
             main.computeCosineMap()
         }
@@ -40,10 +41,10 @@ class Main {
     private val inPath = Paths.get("InputBundleId.txt")
     private val outPath = Paths.get("Output.txt")
     private val outCosinePath = Paths.get("CosineOutput.txt")
-    private val outFactorizePath = Paths.get("FactorizeOutput.txt")
 
     private lateinit var applicationList: List<String>
     private lateinit var applicationInfoList: List<ApplicationInfoResponse.Result>
+    private lateinit var wordSet: MutableSet<String>
     private lateinit var textMap: HashMap<String, DoubleArray>
     private lateinit var matrix: RealMatrix
 
@@ -84,26 +85,25 @@ class Main {
 
     private fun createMatrix() {
         val applications = mutableSetOf<String>()
-        val words = mutableSetOf<String>()
+        wordSet = mutableSetOf<String>()
         applicationInfoList.forEach {
             applications.add(it.trackName)
-            it.description.split(" ").forEach { words.add(it) }
+            it.description.split(" ").forEach { wordSet.add(it) }
         }
-        fillMatrix(words)
     }
 
-    private fun fillMatrix(words: Set<String>) {
+    private fun fillMatrix() {
         textMap = hashMapOf()
         applicationInfoList.forEach {
-            val wordArray = DoubleArray(words.size)
+            val wordArray = DoubleArray(wordSet.size)
             val descriptionWords = it.description.split(" ")
-            words.forEachIndexed { index, s ->
+            wordSet.forEachIndexed { index, s ->
                 val count = descriptionWords.count { it == s }
                 wordArray[index] = count.toDouble()
             }
             textMap.put(it.trackName, wordArray)
         }
-        println(words)
+        println(wordSet)
         println()
         val array = textMap.values.toTypedArray()
         matrix = MatrixUtils.createRealMatrix(array)
