@@ -27,8 +27,8 @@ class Main {
             //main.getApplicationList()
             //main.saveApplicationInfo()
             main.readApplicationInfo()
+            main.createWordSet()
             main.createMatrix()
-            main.fillMatrix()
             main.factorizeMatrix()
             main.computeCosineMap()
         }
@@ -83,16 +83,14 @@ class Main {
         applicationInfoList = gson.fromJson(description, object : TypeToken<List<ApplicationInfoResponse.Result>>() {}.type)
     }
 
-    private fun createMatrix() {
-        val applications = mutableSetOf<String>()
-        wordSet = mutableSetOf<String>()
+    private fun createWordSet() {
+        wordSet = mutableSetOf()
         applicationInfoList.forEach {
-            applications.add(it.trackName)
             it.description.split(" ").forEach { wordSet.add(it) }
         }
     }
 
-    private fun fillMatrix() {
+    private fun createMatrix() {
         textMap = hashMapOf()
         applicationInfoList.forEach {
             val wordArray = DoubleArray(wordSet.size)
