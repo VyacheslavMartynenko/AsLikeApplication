@@ -14,13 +14,13 @@ import java.io.FileReader
 import java.io.FileWriter
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.nio.file.StandardOpenOption
 import java.util.*
 import java.util.concurrent.Executors
 
 
 class Main {
     //TODO rename to csv
+    //TODO remove block words
     //TODO move files constants
     //TODO fix double precision
     //TODO fill database
@@ -28,8 +28,8 @@ class Main {
         @JvmStatic
         fun main(args: Array<String>) {
             val main = Main()
-            //main.getApplicationList()
-            //main.saveApplicationInfo()
+//            main.getApplicationList()
+//            main.saveApplicationInfo()
             main.readApplicationInfoFromCsw()
             main.createWordSet()
             main.createMatrix()
@@ -43,7 +43,6 @@ class Main {
     private val gson = Gson()
 
     private val inPath = Paths.get("InputBundleId.txt")
-    private val outPath = Paths.get("Output.txt")
 
     private lateinit var applicationList: List<String>
     private lateinit var applicationInfoList: MutableList<ApplicationInfoResponse.Result>
@@ -72,12 +71,10 @@ class Main {
         applicationInfoResponse.results.firstOrNull()?.let {
             val description = it.description.replace("\'", "").replace("[^A-Za-z ]".toRegex(), " ").trim().toLowerCase()
             it.description = description
-            val appInfo = gson.toJson(it).replace("\\n", " ").replace(" {2,}".toRegex(), " ")
-            val languageIdentifier = LanguageIdentifier(appInfo)
+            val languageIdentifier = LanguageIdentifier(description)
             val lang = languageIdentifier.language
             if (lang == "en") {
                 writeApplicationInfoToCsw(it)
-                Files.write(outPath, appInfo.plus(", ").toByteArray(), StandardOpenOption.APPEND)
             }
         }
     }
@@ -87,7 +84,6 @@ class Main {
         cswWriter.writeNext(arrayOf(app.trackName, app.description, app.trackId.toString(), app.bundleId, app.userRating.toString()))
         cswWriter.flush()
         cswWriter.close()
-        readApplicationInfoFromCsw()
     }
 
     private fun readApplicationInfoFromCsw() {
@@ -165,7 +161,7 @@ class Main {
         if (!file.isFile) {
             file.createNewFile()
         }
-        return CSVWriter(FileWriter(file))
+        return CSVWriter(FileWriter(file, true))
     }
 
     private fun getCswReader(pathName: String): CSVReader? {
