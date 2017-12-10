@@ -40,7 +40,6 @@ class Main {
 
     private val inPath = Paths.get("InputBundleId.txt")
     private val outPath = Paths.get("Output.txt")
-    private val outCosinePath = Paths.get("CosineOutput.txt")
 
     private lateinit var applicationList: List<String>
     private lateinit var applicationInfoList: List<ApplicationInfoResponse.Result>
