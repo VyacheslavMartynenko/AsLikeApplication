@@ -100,8 +100,7 @@ class Main {
             }.toDoubleArray()
             textMap.put(it.trackName, wordArray)
         }
-        val array = textMap.values.toTypedArray()
-        matrix = MatrixUtils.createRealMatrix(array)
+        matrix = MatrixUtils.createRealMatrix(textMap.values.toTypedArray())
         println(matrix.data.forEach { println(it.toList()) })
         println()
     }
