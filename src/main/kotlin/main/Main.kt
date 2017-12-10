@@ -19,7 +19,6 @@ import java.util.concurrent.Executors
 
 class Main {
     //TODO remove block words
-    //TODO move files constants
     //TODO fix double precision
     //TODO fill full database
     companion object {
@@ -40,6 +39,10 @@ class Main {
     private val apiCall = ApiCall.Factory.create()
 
     private val inPath = Paths.get("InputBundleId.txt")
+    private val appPath = "App.csv"
+    private val uPath = "U.csv"
+    private val cosinePath = "Cosine.csv"
+    private val selectedLanguage = "en"
 
     private lateinit var applicationList: List<String>
     private lateinit var applicationInfoList: MutableList<ApplicationInfoResponse.Result>
@@ -70,21 +73,21 @@ class Main {
             it.description = description
             val languageIdentifier = LanguageIdentifier(description)
             val lang = languageIdentifier.language
-            if (lang == "en") {
+            if (lang == selectedLanguage) {
                 writeApplicationInfoToCsv(it)
             }
         }
     }
 
     private fun writeApplicationInfoToCsv(app: ApplicationInfoResponse.Result) {
-        val csvWriter = getCsvWriter("App.csv")
+        val csvWriter = getCsvWriter(appPath)
         csvWriter.writeNext(arrayOf(app.trackName, app.description, app.trackId.toString(), app.bundleId, app.userRating.toString()))
         csvWriter.flush()
         csvWriter.close()
     }
 
     private fun readApplicationInfoFromCsv() {
-        val csvReader = getCsvReader("App.csv")
+        val csvReader = getCsvReader(appPath)
         applicationInfoList = mutableListOf()
         csvReader?.readAll()?.forEach {
             val applicationInfo = ApplicationInfoResponse.Result(it[2].toInt(), it[0], it[3], it[1], it[4].toDouble())
@@ -124,7 +127,7 @@ class Main {
     }
 
     private fun writeFactorizeMatrixToCsv(data: Array<out DoubleArray>) {
-        val csvWriter = getCsvWriter("U.csv")
+        val csvWriter = getCsvWriter(uPath)
         data.map { it.map { it.toString() }.toTypedArray() }.toTypedArray().forEach { csvWriter.writeNext(it) }
         csvWriter.flush()
         csvWriter.close()
@@ -140,7 +143,7 @@ class Main {
     }
 
     private fun writeCosineMapToCsv(data: SortedMap<String, Double>) {
-        val csvWriter = getCsvWriter("Cosine.csv")
+        val csvWriter = getCsvWriter(cosinePath)
         data.entries.map { arrayOf<String>(it.key, it.value.toString()) }.forEach { csvWriter.writeNext(it) }
         csvWriter.flush()
         csvWriter.close()
