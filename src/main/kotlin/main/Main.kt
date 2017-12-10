@@ -95,8 +95,7 @@ class Main {
         textMap = mutableMapOf()
         applicationInfoList.forEach {
             val descriptionWords = it.description.split(" ")
-            val wordArray = wordSet.map {
-                val word = it
+            val wordArray = wordSet.map { word ->
                 descriptionWords.count { it == word }.toDouble()
             }.toDoubleArray()
             textMap.put(it.trackName, wordArray)
