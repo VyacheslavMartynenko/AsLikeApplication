@@ -1,6 +1,5 @@
 package main
 
-import com.google.gson.Gson
 import com.opencsv.CSVReader
 import com.opencsv.CSVWriter
 import networking.ApiCall
@@ -19,7 +18,6 @@ import java.util.concurrent.Executors
 
 
 class Main {
-    //TODO rename to csv
     //TODO remove block words
     //TODO move files constants
     //TODO fix double precision
@@ -30,7 +28,7 @@ class Main {
             val main = Main()
 //            main.getApplicationList()
 //            main.saveApplicationInfo()
-            main.readApplicationInfoFromCsw()
+            main.readApplicationInfoFromCsv()
             main.createWordSet()
             main.createMatrix()
             main.factorizeMatrix()
@@ -40,7 +38,6 @@ class Main {
 
     private val executorService = Executors.newSingleThreadExecutor()
     private val apiCall = ApiCall.Factory.create()
-    private val gson = Gson()
 
     private val inPath = Paths.get("InputBundleId.txt")
 
@@ -74,26 +71,26 @@ class Main {
             val languageIdentifier = LanguageIdentifier(description)
             val lang = languageIdentifier.language
             if (lang == "en") {
-                writeApplicationInfoToCsw(it)
+                writeApplicationInfoToCsv(it)
             }
         }
     }
 
-    private fun writeApplicationInfoToCsw(app: ApplicationInfoResponse.Result) {
-        val cswWriter = getCswWriter("App.csv")
-        cswWriter.writeNext(arrayOf(app.trackName, app.description, app.trackId.toString(), app.bundleId, app.userRating.toString()))
-        cswWriter.flush()
-        cswWriter.close()
+    private fun writeApplicationInfoToCsv(app: ApplicationInfoResponse.Result) {
+        val csvWriter = getCsvWriter("App.csv")
+        csvWriter.writeNext(arrayOf(app.trackName, app.description, app.trackId.toString(), app.bundleId, app.userRating.toString()))
+        csvWriter.flush()
+        csvWriter.close()
     }
 
-    private fun readApplicationInfoFromCsw() {
-        val cswReader = getCswReader("App.csv")
+    private fun readApplicationInfoFromCsv() {
+        val csvReader = getCsvReader("App.csv")
         applicationInfoList = mutableListOf()
-        cswReader?.readAll()?.forEach {
+        csvReader?.readAll()?.forEach {
             val applicationInfo = ApplicationInfoResponse.Result(it[2].toInt(), it[0], it[3], it[1], it[4].toDouble())
             applicationInfoList.add(applicationInfo)
         }
-        cswReader?.close()
+        csvReader?.close()
     }
 
     private fun createWordSet() {
@@ -127,7 +124,7 @@ class Main {
     }
 
     private fun writeFactorizeMatrixToCsv(data: Array<out DoubleArray>) {
-        val csvWriter = getCswWriter("U.csv")
+        val csvWriter = getCsvWriter("U.csv")
         data.map { it.map { it.toString() }.toTypedArray() }.toTypedArray().forEach { csvWriter.writeNext(it) }
         csvWriter.flush()
         csvWriter.close()
@@ -143,7 +140,7 @@ class Main {
     }
 
     private fun writeCosineMapToCsv(data: SortedMap<String, Double>) {
-        val csvWriter = getCswWriter("Cosine.csv")
+        val csvWriter = getCsvWriter("Cosine.csv")
         data.entries.map { arrayOf<String>(it.key, it.value.toString()) }.forEach { csvWriter.writeNext(it) }
         csvWriter.flush()
         csvWriter.close()
@@ -156,7 +153,7 @@ class Main {
         return if (d1 <= 0.0 || d2 <= 0.0) 0.0 else (dotProduct / (Math.sqrt(d1) * Math.sqrt(d2)))
     }
 
-    private fun getCswWriter(pathName: String): CSVWriter {
+    private fun getCsvWriter(pathName: String): CSVWriter {
         val file = File(pathName)
         if (!file.isFile) {
             file.createNewFile()
@@ -164,7 +161,7 @@ class Main {
         return CSVWriter(FileWriter(file, true))
     }
 
-    private fun getCswReader(pathName: String): CSVReader? {
+    private fun getCsvReader(pathName: String): CSVReader? {
         val file = File(pathName)
         return if (file.isFile) {
             CSVReader(FileReader(file))
