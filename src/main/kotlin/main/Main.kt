@@ -3,7 +3,6 @@ package main
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.opencsv.CSVWriter
-
 import networking.ApiCall
 import networking.model.ApplicationCosine
 import networking.model.ApplicationInfoResponse
@@ -11,15 +10,13 @@ import org.apache.commons.math3.linear.MatrixUtils
 import org.apache.commons.math3.linear.RealMatrix
 import org.apache.commons.math3.linear.SingularValueDecomposition
 import org.apache.tika.language.LanguageIdentifier
+import java.io.File
+import java.io.FileWriter
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.util.*
 import java.util.concurrent.Executors
-import java.io.FileWriter
-import java.io.File
-
-
 
 
 class Main {
@@ -116,18 +113,14 @@ class Main {
 
     private fun factorizeMatrix() {
         val svd = SingularValueDecomposition(matrix)
-        svd.u.data.forEach { Files.write(outFactorizePath, it.toList().toString().plus(", ").plus(System.lineSeparator()).toByteArray(), StandardOpenOption.APPEND)}
+        svd.u.data.forEach { Files.write(outFactorizePath, it.toList().toString().plus(", ").plus(System.lineSeparator()).toByteArray(), StandardOpenOption.APPEND) }
         println(svd.u.data.forEach { println(it.toList()) })
         println()
         writeToCsv(svd.u.data)
     }
 
     private fun writeToCsv(data: Array<out DoubleArray>) {
-        val file = File("U.csv")
-        if (!file.isFile) {
-            file.createNewFile()
-        }
-        val csvWriter = CSVWriter(FileWriter(file))
+        val csvWriter = CSVWriter(FileWriter(getFile("U.csv")))
         data.forEach { csvWriter.writeNext(it.map { it.toString() }.toTypedArray()) }
         csvWriter.flush()
         csvWriter.close()
@@ -144,9 +137,17 @@ class Main {
     }
 
     private fun computeCosineSimilarity(leftVector: DoubleArray, rightVector: DoubleArray): Double {
-        val dotProduct = leftVector.indices.sumByDouble { (leftVector[it] * rightVector[it]).toLong().toDouble() }
+        val dotProduct = leftVector.indices.sumByDouble { (leftVector[it] * rightVector[it]) }
         val d1 = leftVector.sumByDouble { Math.pow(it, 2.0) }
         val d2 = rightVector.sumByDouble { Math.pow(it, 2.0) }
         return if (d1 <= 0.0 || d2 <= 0.0) 0.0 else (dotProduct / (Math.sqrt(d1) * Math.sqrt(d2)))
+    }
+
+    private fun getFile(pathName: String): File {
+        val file = File(pathName)
+        if (!file.isFile) {
+            file.createNewFile()
+        }
+        return file
     }
 }
