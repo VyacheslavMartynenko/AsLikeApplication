@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package main
 
 import com.opencsv.CSVReader
@@ -19,7 +21,6 @@ import java.util.concurrent.Executors
 
 class Main {
     //TODO remove block words
-    //TODO fix double precision
     //TODO fill full database
     companion object {
         @JvmStatic
@@ -128,7 +129,7 @@ class Main {
 
     private fun writeFactorizeMatrixToCsv(data: Array<out DoubleArray>) {
         val csvWriter = getCsvWriter(uPath)
-        data.map { it.map { it.toString() }.toTypedArray() }.toTypedArray().forEach { csvWriter.writeNext(it) }
+        data.map { it.map { "%.4f".format(it) }.toTypedArray() }.toTypedArray().forEach { csvWriter.writeNext(it) }
         csvWriter.flush()
         csvWriter.close()
     }
@@ -144,7 +145,7 @@ class Main {
 
     private fun writeCosineMapToCsv(data: SortedMap<String, Double>) {
         val csvWriter = getCsvWriter(cosinePath)
-        data.entries.map { arrayOf<String>(it.key, it.value.toString()) }.forEach { csvWriter.writeNext(it) }
+        data.entries.map { arrayOf<String>(it.key, "%.4f".format(it.value)) }.forEach { csvWriter.writeNext(it) }
         csvWriter.flush()
         csvWriter.close()
     }
