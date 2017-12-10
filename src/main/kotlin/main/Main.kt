@@ -20,36 +20,42 @@ import java.util.concurrent.Executors
 
 
 class Main {
-    //TODO remove block words
     //TODO fill full database
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             val main = Main()
-//            main.getApplicationList()
-//            main.saveApplicationInfo()
-            main.readApplicationInfoFromCsv()
-            main.createWordSet()
-            main.createMatrix()
-            main.factorizeMatrix()
-            main.computeCosineMap()
+            main.createStopWordSet()
+            main.getApplicationList()
+            main.saveApplicationInfo()
+//            main.readApplicationInfoFromCsv()
+//            main.createWordSet()
+//            main.createMatrix()
+//            main.factorizeMatrix()
+//            main.computeCosineMap()
         }
     }
 
     private val executorService = Executors.newSingleThreadExecutor()
     private val apiCall = ApiCall.Factory.create()
 
+    private val stopWordsPath = Paths.get("Stopwords.txt")
     private val inPath = Paths.get("InputBundleId.txt")
     private val appPath = "App.csv"
     private val uPath = "U.csv"
     private val cosinePath = "Cosine.csv"
     private val selectedLanguage = "en"
 
+    private lateinit var stopWordSet: MutableSet<String>
     private lateinit var applicationList: List<String>
     private lateinit var applicationInfoList: MutableList<ApplicationInfoResponse.Result>
     private lateinit var wordSet: MutableSet<String>
     private lateinit var textMap: MutableMap<String, DoubleArray>
     private lateinit var matrix: RealMatrix
+
+    private fun createStopWordSet() {
+        stopWordSet = Files.readAllLines(stopWordsPath).toMutableSet()
+    }
 
     private fun getApplicationList() {
         applicationList = Files.readAllLines(inPath)
@@ -71,10 +77,12 @@ class Main {
     private fun write(applicationInfoResponse: ApplicationInfoResponse) {
         applicationInfoResponse.results.firstOrNull()?.let {
             val description = it.description.replace("\'", "").replace("[^A-Za-z ]".toRegex(), " ").trim().toLowerCase()
-            it.description = description
             val languageIdentifier = LanguageIdentifier(description)
             val lang = languageIdentifier.language
             if (lang == selectedLanguage) {
+                val descriptionWordSet = description.split(" ").toMutableSet()
+                val filteredDescription = descriptionWordSet.filter { it.isNotBlank() && stopWordSet.contains(it).not() }.joinToString(" ")
+                it.description = filteredDescription
                 writeApplicationInfoToCsv(it)
             }
         }
