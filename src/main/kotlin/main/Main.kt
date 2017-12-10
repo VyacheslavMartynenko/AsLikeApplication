@@ -87,6 +87,8 @@ class Main {
         applicationInfoList.forEach {
             it.description.split(" ").forEach { wordSet.add(it) }
         }
+        println(wordSet)
+        println()
     }
 
     private fun createMatrix() {
@@ -100,8 +102,6 @@ class Main {
             }
             textMap.put(it.trackName, wordArray)
         }
-        println(wordSet)
-        println()
         val array = textMap.values.toTypedArray()
         matrix = MatrixUtils.createRealMatrix(array)
         println(matrix.data.forEach { println(it.toList()) })
