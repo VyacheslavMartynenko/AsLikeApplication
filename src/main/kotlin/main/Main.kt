@@ -111,13 +111,13 @@ class Main {
 
     private fun factorizeMatrix() {
         val svd = SingularValueDecomposition(matrix)
-        writeToCsv(svd.u.data)
+        writeFactorizeMatrixToCsv(svd.u.data)
         println(svd.u.data.forEach { println(it.toList()) })
         println()
     }
 
-    private fun writeToCsv(data: Array<out DoubleArray>) {
-        val csvWriter = CSVWriter(FileWriter(getFile("U.csv")))
+    private fun writeFactorizeMatrixToCsv(data: Array<out DoubleArray>) {
+        val csvWriter = getCswWriter("U.csv")
         data.forEach { csvWriter.writeNext(it.map { it.toString() }.toTypedArray()) }
         csvWriter.flush()
         csvWriter.close()
@@ -127,9 +127,16 @@ class Main {
         val test = textMap[applicationInfoList[0].trackName] as DoubleArray
         val cosineMap = textMap.mapValues { computeCosineSimilarity(test, it.value) }
         val sortedCosineMap = cosineMap.toSortedMap(Comparator { o1, o2 -> if (cosineMap[o1]!! >= cosineMap[o2]!!) -1 else 1 })
-        sortedCosineMap.forEach { t, u -> Files.write(outCosinePath, gson.toJson(ApplicationCosine(t, u)).plus(", ").toByteArray(), StandardOpenOption.APPEND) }
+        writeCosineMapToCsv(sortedCosineMap)
         println(sortedCosineMap.values.toList().subList(0, 2))
         println()
+    }
+
+    private fun writeCosineMapToCsv(data: SortedMap<String, Double>) {
+        val csvWriter = getCswWriter("Cosine.csv")
+        data.entries.map { arrayOf<String>(it.key, it.value.toString()) }.forEach { csvWriter.writeNext(it) }
+        csvWriter.flush()
+        csvWriter.close()
     }
 
     private fun computeCosineSimilarity(leftVector: DoubleArray, rightVector: DoubleArray): Double {
@@ -139,11 +146,11 @@ class Main {
         return if (d1 <= 0.0 || d2 <= 0.0) 0.0 else (dotProduct / (Math.sqrt(d1) * Math.sqrt(d2)))
     }
 
-    private fun getFile(pathName: String): File {
+    private fun getCswWriter(pathName: String): CSVWriter {
         val file = File(pathName)
         if (!file.isFile) {
             file.createNewFile()
         }
-        return file
+        return CSVWriter(FileWriter(file))
     }
 }
