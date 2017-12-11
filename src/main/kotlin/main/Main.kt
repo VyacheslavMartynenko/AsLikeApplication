@@ -114,15 +114,18 @@ class Main {
     }
 
     private fun createWordSet() {
+        println("Start creation of word set...")
         wordSet = mutableSetOf()
         applicationInfoList.forEach {
             it.description.split(" ").forEach { wordSet.add(it) }
         }
-        println(wordSet)
+//        println(wordSet)
+        println("Complete creation of word set.")
         println()
     }
 
     private fun createMatrix() {
+        println("Start creation of matrix...")
         textMap = mutableMapOf()
         applicationInfoList.forEach {
             val descriptionWords = it.description.split(" ")
@@ -132,38 +135,48 @@ class Main {
             textMap.put(it.trackName, wordArray)
         }
         matrix = MatrixUtils.createRealMatrix(textMap.values.toTypedArray())
-        println(matrix.data.forEach { println(it.toList()) })
+//        println(matrix.data.forEach { println(it.toList()) })
+        println("Complete creation of matrix.")
         println()
     }
 
     private fun factorizeMatrix() {
+        println("Start factorization...")
         val svd = SingularValueDecomposition(matrix)
         writeFactorizeMatrixToCsv(svd.u.data)
-        println(svd.u.data.forEach { println(it.toList()) })
+//        println(svd.u.data.forEach { println(it.toList()) })
+        println("Complete factorization.")
         println()
     }
 
     private fun writeFactorizeMatrixToCsv(data: Array<out DoubleArray>) {
+        println("Start writing factorized matrix...")
         val csvWriter = getCsvWriter(uPath)
         data.map { it.map { "%.4f".format(it) }.toTypedArray() }.toTypedArray().forEach { csvWriter.writeNext(it) }
         csvWriter.flush()
         csvWriter.close()
+        println("Complete writing factorized matrix.")
+        println()
     }
 
     private fun computeCosineMap() {
+        println("Start computing cosine map...")
         val test = textMap[applicationInfoList[0].trackName] as DoubleArray
         val cosineMap = textMap.mapValues { computeCosineSimilarity(test, it.value) }
         val sortedCosineMap = cosineMap.toSortedMap(Comparator { o1, o2 -> if (cosineMap[o1]!! >= cosineMap[o2]!!) -1 else 1 })
         writeCosineMapToCsv(sortedCosineMap)
-        println(sortedCosineMap.values.toList().subList(0, 2))
+//        println(sortedCosineMap.values.toList().subList(0, 2))
+        println("Complete computing cosine map.")
         println()
     }
 
     private fun writeCosineMapToCsv(data: SortedMap<String, Double>) {
+        println("Start writing cosine map...")
         val csvWriter = getCsvWriter(cosinePath)
         data.entries.map { arrayOf<String>(it.key, "%.4f".format(it.value)) }.forEach { csvWriter.writeNext(it) }
         csvWriter.flush()
         csvWriter.close()
+        println("Complete writing cosine map...")
     }
 
     private fun computeCosineSimilarity(leftVector: DoubleArray, rightVector: DoubleArray): Double {
