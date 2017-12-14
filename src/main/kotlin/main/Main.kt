@@ -2,6 +2,7 @@
 
 package main
 
+import com.google.common.collect.Lists
 import com.opencsv.CSVReader
 import com.opencsv.CSVWriter
 import networking.ApiCall
@@ -145,8 +146,10 @@ class Main {
     private fun writeMatrixToCsv(data: RealMatrix) {
         println("Start writing matrix...")
         val csvWriter = getCsvWriter(matrixPath)
-        data.data.map { it.map { "%.4f".format(it) }.toTypedArray() }.toTypedArray().forEach {
-            csvWriter.writeNext(it)
+        Lists.partition(data.data.toList(), 100).forEach {
+            it.map { it.map { "%.4f".format(it) }.toTypedArray() }.toTypedArray().forEach {
+                csvWriter.writeNext(it)
+            }
         }
         csvWriter.flush()
         csvWriter.close()
