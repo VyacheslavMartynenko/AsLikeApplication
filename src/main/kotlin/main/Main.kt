@@ -36,6 +36,7 @@ class Main {
     private val stopWordsPath = Paths.get("Stopwords.txt")
     private val inPath = Paths.get("InputBundleId.txt")
     private val appPath = "App.csv"
+    private val matrixPath = "Matrix.csv"
     private val uPath = "U.csv"
     private val cosinePath = "Cosine.csv"
     private val selectedLanguage = "en"
@@ -137,15 +138,28 @@ class Main {
         matrix = MatrixUtils.createRealMatrix(textMap.values.toTypedArray())
 //        println(matrix.data.forEach { println(it.toList()) })
         println("Complete creation of matrix.")
+        writeMatrixToCsv(matrix)
+        println()
+    }
+
+    private fun writeMatrixToCsv(data: RealMatrix) {
+        println("Start writing matrix...")
+        val csvWriter = getCsvWriter(matrixPath)
+        data.data.map { it.map { "%.4f".format(it) }.toTypedArray() }.toTypedArray().forEach {
+            csvWriter.writeNext(it)
+        }
+        csvWriter.flush()
+        csvWriter.close()
+        println("Complete writing matrix.")
         println()
     }
 
     private fun factorizeMatrix() {
         println("Start factorization...")
         val svd = SingularValueDecomposition(matrix)
+        println("Complete factorization.")
         writeFactorizeMatrixToCsv(svd.u.data)
 //        println(svd.u.data.forEach { println(it.toList()) })
-        println("Complete factorization.")
         println()
     }
 
@@ -164,9 +178,9 @@ class Main {
         val test = textMap[applicationInfoList[0].trackName] as DoubleArray
         val cosineMap = textMap.mapValues { computeCosineSimilarity(test, it.value) }
         val sortedCosineMap = cosineMap.toSortedMap(Comparator { o1, o2 -> if (cosineMap[o1]!! >= cosineMap[o2]!!) -1 else 1 })
+        println("Complete computing cosine map.")
         writeCosineMapToCsv(sortedCosineMap)
 //        println(sortedCosineMap.values.toList().subList(0, 2))
-        println("Complete computing cosine map.")
         println()
     }
 
