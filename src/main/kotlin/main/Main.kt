@@ -146,11 +146,7 @@ class Main {
     private fun writeMatrixToCsv(data: RealMatrix) {
         println("Start writing matrix...")
         val csvWriter = getCsvWriter(matrixPath)
-        Lists.partition(data.data.toList(), 100).forEach {
-            it.map { it.map { "%.4f".format(it) }.toTypedArray() }.toTypedArray().forEach {
-                csvWriter.writeNext(it)
-            }
-        }
+        data.data.forEach { csvWriter.writeNext(it.map { it.toString() }.toTypedArray()) }
         csvWriter.flush()
         csvWriter.close()
         println("Complete writing matrix.")
