@@ -139,8 +139,8 @@ class Main {
         matrix = MatrixUtils.createRealMatrix(textMap.values.toTypedArray())
 //        println(matrix.data.forEach { println(it.toList()) })
         println("Complete creation of matrix.")
-        writeMatrixToCsv(matrix)
         println()
+        writeMatrixToCsv(matrix)
     }
 
     private fun writeMatrixToCsv(data: RealMatrix) {
