@@ -2,7 +2,6 @@
 
 package main
 
-import com.google.common.collect.Lists
 import com.opencsv.CSVReader
 import com.opencsv.CSVWriter
 import networking.ApiCall
@@ -26,8 +25,8 @@ class Main {
         @JvmStatic
         fun main(args: Array<String>) {
             val main = Main()
-            //main.prepareDataSet()
-            main.processDataSet()
+            main.prepareDataSet()
+            //main.processDataSet()
         }
     }
 
@@ -36,7 +35,9 @@ class Main {
 
     private val stopWordsPath = Paths.get("Stopwords.txt")
     private val inPath = Paths.get("InputBundleId.txt")
+    private val inCosinePath = Paths.get("SeedApps.txt")
     private val appPath = "App.csv"
+    private val appCosinePath = "AppCosine.csv"
     private val matrixPath = "Matrix.csv"
     private val uPath = "U.csv"
     private val cosinePath = "Cosine.csv"
@@ -44,16 +45,18 @@ class Main {
 
     private lateinit var stopWordSet: MutableSet<String>
     private lateinit var applicationList: List<String>
+    private lateinit var applicationCosineList: MutableList<String>
     private lateinit var applicationInfoList: MutableList<ApplicationInfoResponse.Result>
-    private lateinit var applicationCosineList: MutableList<ApplicationInfoResponse.Result>
     private lateinit var wordSet: MutableSet<String>
     private lateinit var textMap: MutableMap<String, DoubleArray>
     private lateinit var matrix: RealMatrix
 
     private fun prepareDataSet() {
         createStopWordSet()
-        getApplicationList()
-        saveApplicationInfo()
+        //getApplicationList()
+        //saveApplicationInfo()
+        getApplicationCosineList()
+        saveApplicationCosineInfo()
     }
 
     private fun processDataSet() {
@@ -72,20 +75,29 @@ class Main {
         applicationList = Files.readAllLines(inPath)
     }
 
+    private fun getApplicationCosineList() {
+        applicationCosineList = Files.readAllLines(inCosinePath)
+    }
+
     private fun saveApplicationInfo() {
-        applicationList.forEach { executorService.execute(writeApplicationInfo(it)) }
+        applicationList.forEach { executorService.execute(writeApplicationInfo(it, false)) }
         executorService.shutdown()
     }
 
-    private fun writeApplicationInfo(id: String): Runnable {
+    private fun saveApplicationCosineInfo() {
+        applicationCosineList.forEach { executorService.execute(writeApplicationInfo(it, true)) }
+        executorService.shutdown()
+    }
+
+    private fun writeApplicationInfo(id: String, isCosine: Boolean): Runnable {
         return Runnable {
             id.toIntOrNull()?.let {
-                apiCall.getApplicationInfoById(it).subscribe({ write(it) }, { println(it) })
-            } ?: apiCall.getApplicationInfoByBundleId(id).subscribe({ write(it) }, { println(it) })
+                apiCall.getApplicationInfoById(it).subscribe({ write(it, isCosine) }, { println(it) })
+            } ?: apiCall.getApplicationInfoByBundleId(id).subscribe({ write(it, isCosine) }, { println(it) })
         }
     }
 
-    private fun write(applicationInfoResponse: ApplicationInfoResponse) {
+    private fun write(applicationInfoResponse: ApplicationInfoResponse, isCosine: Boolean) {
         applicationInfoResponse.results.firstOrNull()?.let {
             val description = it.description.replace("\'", "").replace("[^A-Za-z ]".toRegex(), " ").trim().toLowerCase()
             val languageIdentifier = LanguageIdentifier(description)
@@ -94,13 +106,14 @@ class Main {
                 val descriptionWordSet = description.split(" ").toMutableSet()
                 val filteredDescription = descriptionWordSet.filter { it.isNotBlank() && stopWordSet.contains(it).not() }.joinToString(" ")
                 it.description = filteredDescription
-                writeApplicationInfoToCsv(it)
+                writeApplicationInfoToCsv(it, isCosine)
             }
         }
     }
 
-    private fun writeApplicationInfoToCsv(app: ApplicationInfoResponse.Result) {
-        val csvWriter = getCsvWriter(appPath)
+    private fun writeApplicationInfoToCsv(app: ApplicationInfoResponse.Result, isCosine: Boolean) {
+        val path = if (isCosine) appCosinePath else appPath
+        val csvWriter = getCsvWriter(path)
         csvWriter.writeNext(arrayOf(app.trackName, app.description, app.trackId.toString(), app.bundleId, app.userRating.toString()))
         csvWriter.flush()
         csvWriter.close()
