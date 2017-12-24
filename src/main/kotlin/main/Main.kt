@@ -45,6 +45,7 @@ class Main {
     private lateinit var stopWordSet: MutableSet<String>
     private lateinit var applicationList: List<String>
     private lateinit var applicationInfoList: MutableList<ApplicationInfoResponse.Result>
+    private lateinit var applicationCosineList: MutableList<ApplicationInfoResponse.Result>
     private lateinit var wordSet: MutableSet<String>
     private lateinit var textMap: MutableMap<String, DoubleArray>
     private lateinit var matrix: RealMatrix
@@ -59,7 +60,7 @@ class Main {
         readApplicationInfoFromCsv()
         createWordSet()
         createMatrix()
-        factorizeMatrix()
+//        factorizeMatrix()
         computeCosineMap()
     }
 
