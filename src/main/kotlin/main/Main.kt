@@ -25,8 +25,8 @@ class Main {
         @JvmStatic
         fun main(args: Array<String>) {
             val main = Main()
-            main.prepareDataSet()
-            //main.processDataSet()
+//            main.prepareDataSet()
+            main.processDataSet()
         }
     }
 
@@ -40,13 +40,13 @@ class Main {
     private val appCosinePath = "AppCosine.csv"
     private val matrixPath = "Matrix.csv"
     private val uPath = "U.csv"
-    private val cosinePath = "Cosine.csv"
     private val selectedLanguage = "en"
 
     private lateinit var stopWordSet: MutableSet<String>
     private lateinit var applicationList: List<String>
     private lateinit var applicationCosineList: MutableList<String>
     private lateinit var applicationInfoList: MutableList<ApplicationInfoResponse.Result>
+    private lateinit var applicationCosineInfoList: MutableList<ApplicationInfoResponse.Result>
     private lateinit var wordSet: MutableSet<String>
     private lateinit var textMap: MutableMap<String, DoubleArray>
     private lateinit var matrix: RealMatrix
@@ -61,6 +61,7 @@ class Main {
 
     private fun processDataSet() {
         readApplicationInfoFromCsv()
+        readApplicationCosineInfoFromCsv()
         createWordSet()
         createMatrix()
 //        factorizeMatrix()
@@ -129,6 +130,16 @@ class Main {
         csvReader?.close()
     }
 
+    private fun readApplicationCosineInfoFromCsv() {
+        val csvReader = getCsvReader(appCosinePath)
+        applicationCosineInfoList = mutableListOf()
+        csvReader?.readAll()?.forEach {
+            val applicationInfo = ApplicationInfoResponse.Result(it[2].toInt(), it[0], it[3], it[1], it[4].toDouble())
+            applicationCosineInfoList.add(applicationInfo)
+        }
+        csvReader?.close()
+    }
+
     private fun createWordSet() {
         println("Start creation of word set...")
         wordSet = mutableSetOf()
@@ -188,18 +199,24 @@ class Main {
 
     private fun computeCosineMap() {
         println("Start computing cosine map...")
-        val test = textMap[applicationInfoList[0].trackName] as DoubleArray
-        val cosineMap = textMap.mapValues { computeCosineSimilarity(test, it.value) }
-        val sortedCosineMap = cosineMap.toSortedMap(Comparator { o1, o2 -> if (cosineMap[o1]!! >= cosineMap[o2]!!) -1 else 1 })
-        println("Complete computing cosine map.")
-        writeCosineMapToCsv(sortedCosineMap)
+        applicationCosineInfoList.forEach {
+            val app = textMap[it.trackName] as DoubleArray
+            computeCosineApp(app, it.trackName)
+        }
 //        println(sortedCosineMap.values.toList().subList(0, 2))
         println()
     }
 
-    private fun writeCosineMapToCsv(data: SortedMap<String, Double>) {
+    private fun computeCosineApp(app: DoubleArray, name: String) {
+        val cosineMap = textMap.mapValues { computeCosineSimilarity(app, it.value) }
+        val sortedCosineMap = cosineMap.toSortedMap(Comparator { o1, o2 -> if (cosineMap[o1]!! >= cosineMap[o2]!!) -1 else 1 })
+        println("Complete computing cosine map.")
+        writeCosineAppToCsv(sortedCosineMap, name)
+    }
+
+    private fun writeCosineAppToCsv(data: SortedMap<String, Double>, name: String) {
         println("Start writing cosine map...")
-        val csvWriter = getCsvWriter(cosinePath)
+        val csvWriter = getCsvWriter("Map\\$name.csv")
         data.entries.map { arrayOf<String>(it.key, "%.4f".format(it.value)) }.forEach { csvWriter.writeNext(it) }
         csvWriter.flush()
         csvWriter.close()
