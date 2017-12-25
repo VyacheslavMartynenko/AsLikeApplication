@@ -40,6 +40,7 @@ class Main {
     private val appCosinePath = "AppCosine.csv"
     private val matrixPath = "Matrix.csv"
     private val uPath = "U.csv"
+    private val cosinePath = "Cosine.csv"
     private val selectedLanguage = "en"
 
     private lateinit var stopWordSet: MutableSet<String>
@@ -65,7 +66,8 @@ class Main {
         createWordSet()
         createMatrix()
 //        factorizeMatrix()
-        computeCosineMap()
+//        computeCosineMap()
+        computeFullCosineMap()
     }
 
     private fun createStopWordSet() {
@@ -207,6 +209,20 @@ class Main {
         println()
     }
 
+    private fun computeFullCosineMap() {
+        println("Start computing cosine map...")
+        val cosineMap = textMap.mapValues { 0.0 }.toMutableMap()
+        applicationCosineInfoList.forEach {
+            val app = textMap[it.trackName] as DoubleArray
+            textMap.forEach { t, u -> cosineMap[t] = cosineMap[t]?.plus(computeCosineSimilarity(app, u)) ?: 0.0 }
+        }
+        val mediumCosineMap = cosineMap.mapValues { it.value / applicationCosineInfoList.size }
+//        println(sortedCosineMap.values.toList().subList(0, 2))
+        val sortedCosineMap = mediumCosineMap.toSortedMap(Comparator { o1, o2 -> if (cosineMap[o1]!! >= cosineMap[o2]!!) -1 else 1 })
+        println("Complete computing cosine map.")
+        writeCosineFullAppToCsv(sortedCosineMap)
+    }
+
     private fun computeCosineApp(app: DoubleArray, name: String) {
         val cosineMap = textMap.mapValues { computeCosineSimilarity(app, it.value) }
         val sortedCosineMap = cosineMap.toSortedMap(Comparator { o1, o2 -> if (cosineMap[o1]!! >= cosineMap[o2]!!) -1 else 1 })
@@ -217,6 +233,15 @@ class Main {
     private fun writeCosineAppToCsv(data: SortedMap<String, Double>, name: String) {
         println("Start writing cosine map...")
         val csvWriter = getCsvWriter("Map\\$name.csv")
+        data.entries.map { arrayOf<String>(it.key, "%.4f".format(it.value)) }.forEach { csvWriter.writeNext(it) }
+        csvWriter.flush()
+        csvWriter.close()
+        println("Complete writing cosine map...")
+    }
+
+    private fun writeCosineFullAppToCsv(data: SortedMap<String, Double>) {
+        println("Start writing cosine map...")
+        val csvWriter = getCsvWriter(cosinePath)
         data.entries.map { arrayOf<String>(it.key, "%.4f".format(it.value)) }.forEach { csvWriter.writeNext(it) }
         csvWriter.flush()
         csvWriter.close()
