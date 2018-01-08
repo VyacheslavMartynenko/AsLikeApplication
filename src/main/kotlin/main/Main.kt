@@ -242,7 +242,7 @@ class Main {
     private fun writeCosineFullAppToCsv(data: SortedMap<String, Double>) {
         println("Start writing cosine map...")
         val csvWriter = getCsvWriter(cosinePath)
-        data.entries.map { arrayOf<String>(it.key, "%.4f".format(it.value)) }.forEach { csvWriter.writeNext(it) }
+        data.entries.map {app -> arrayOf<String>(app.key, applicationInfoList.find { it.trackName == app.key }?.trackId.toString(), "%.4f".format(app.value)) }.forEach { csvWriter.writeNext(it) }
         csvWriter.flush()
         csvWriter.close()
         println("Complete writing cosine map...")
